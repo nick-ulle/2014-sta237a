@@ -25,30 +25,69 @@ example1 = function() {
     #plot(x)
 
     # ----- Compute Periodogram
-    taper = tukey_hanning(n, 0.1)
+    taper = tukey_hanning(n, 0.01)
     I = periodogram(x, taper)
+    return(I)
 
     # ----- Compute Kernel Estimate
-    f = kern_smooth(I, 0.1)
+    f = kernel_smooth(I, 0.1, epanechnikov)
+    return(f)
 
     # ----- Bootstrap
+    # Set phi for computing lag 1 autocorrelation.
+    phi = function(x) 2 * cos(x)
+    boot = spectral_bootstrap(2000, n, phi, f)
+
+    return(boot)
 }
 
-kernel_ep = function(x) 
+spec = function(x) 1 / (2 * pi * (1.81 - 1.8 * cos(x)))
+
+# Example of phi for computing spectral distribution F(0.5).
+# phi = function(x) ifelse(x <= 0.5 * pi, 1, 0)
+
+spectral_bootstrap = function(n_boot, n, phi, f) 
+    # Bootstrap a spectral statistic.
+    #
+    # Args:
+    #   n_boot      number of bootstrap replicates
+    #   n           number of observations in original sample
+    #   phi         statistic function
+    #   f           spectral density function
+    #
+    # Returns:
+    #   A vector of bootstrapped statistics.
+{
+    # Compute the Fourier frequencies.
+    max_j = floor(n / 2)
+    freq = 2 * pi * seq(0, max_j) / n
+
+    # Draw the sample.
+    samp = replicate(n_boot, rexp(max_j + 1))
+    samp = samp * f(freq)
+
+    # Compute the bootstrapped sdf, F(pi).
+    sdf = pi * colMeans(samp)
+
+    # Compute the bootstrapped ratio statistics B(phi, J*).
+    samp = samp * phi(freq)
+    return(pi * colMeans(samp) / sdf)
+}
+
+epanechnikov = function(x) 
     # Evaluate the Epanechnikov kernel.
 {
     ifelse(abs(x) <= pi, 0.75 * pi * (1 - (x / pi)^2), 0)
 }
 
-kern_smooth = function(y, b) 
+kernel_smooth = function(y, b, kernel) 
     # Compute a kernel-smoothed estimate.
     #
     # Args:
-    #   y   sample points
-    #   b   bandwidth
+    #   y       sample points
+    #   b       bandwidth
+    #   kernel  kernel function
 {
-    kernel = kernel_ep
-
     n = length(y)
     # Get indexes of Fourier frequencies.
     x = 2 * pi * seq(0, n - 1) / n
