@@ -3,9 +3,13 @@
 main = function() {
 }
 
-example1 = function() {
+#############
+# Example 1 #
+#############
+
+example1 = function(seed = 506) {
     # ----- Simulate Sample
-    set.seed(506)
+    set.seed(seed)
     n = 64
     a = 0.9
 
@@ -21,31 +25,42 @@ example1 = function() {
     x = ts(x)
 
     x_bar = mean(x)
-    x = x - x_bar
+    #x = x - x_bar
     #plot(x)
 
-    # ----- Compute Periodogram
+    # ----- Periodogram & Spectral Density
     taper = tukey_hanning(n, 0.01)
     I = periodogram(x, taper)
 
-    # ----- Compute Kernel Estimate
-    f = kernel_smooth(I, 0.1, epanechnikov)
+    f_hat = kernel_smooth(I, 0.1, epanechnikov)
 
     # ----- Bootstrap
     # Set phi for computing lag 1 autocorrelation.
     phi = function(x) cos(x)
-    boot = spectral_bootstrap(2000, n, phi, f)
+    boot = spectral_bootstrap(2000, n, phi, f_hat)
 
-    return(boot)
+    stat = spectral_statistic(n, phi, f_hat)
+    correction = taper_correction(n, taper)
+
+    boot = boot * correction
+    stat = stat * correction
+
+    # ----- Output
+    list(boot = boot, stat = stat)
 }
 
-spec = function(x) 1 / (2 * pi * (1.81 - 1.8 * cos(x)))
+example1_spectral = function(x) 
+    # Evaluate true spectral density for Example 1.
+{
+    1 / (2 * pi * (1.81 - 1.8 * cos(x)))
+}
 
-# Example of phi for computing spectral distribution F(0.5).
-# phi = function(x) ifelse(x <= 0.5 * pi, 1, 0)
+#######################
+# Bootstrap Functions #
+#######################
 
 spectral_bootstrap = function(n_boot, n, phi, f) 
-    # Bootstrap a spectral statistic.
+    # Bootstrap a spectral ratio statistic.
     #
     # Args:
     #   n_boot      number of bootstrap replicates
@@ -57,11 +72,11 @@ spectral_bootstrap = function(n_boot, n, phi, f)
     #   A vector of bootstrapped statistics.
 {
     # Compute the Fourier frequencies.
-    max_j = floor(n / 2)
-    freq = 2 * pi * seq(0, max_j) / n
+    freq = fourier_freq(n, restrict = TRUE)
+    n_freq = length(freq)
 
     # Draw the sample.
-    samp = replicate(n_boot, rexp(max_j + 1))
+    samp = replicate(n_boot, rexp(n_freq))
     samp = samp * f(freq)
 
     # Compute the bootstrapped sdf, F(pi).
@@ -72,44 +87,44 @@ spectral_bootstrap = function(n_boot, n, phi, f)
     return(pi * colMeans(samp) / sdf)
 }
 
-epanechnikov = function(x) 
-    # Evaluate the Epanechnikov kernel.
+spectral_statistic = function(n, phi, f) 
+    # Approximate a spectral ratio statistic.
 {
-    ifelse(abs(x) <= pi, 0.75 * pi * (1 - (x / pi)^2), 0)
+    freq = fourier_freq(n)
+
+    # Note: the factors of pi cancel out.
+    mean(phi(freq) * f(freq)) / mean(f(freq))
 }
 
-kernel_smooth = function(y, b, kernel) 
-    # Compute a kernel-smoothed estimate.
+taper_correction = function(n, taper)
+    # Compute tapering correction factor.
     #
     # Args:
-    #   y       sample points
-    #   b       bandwidth
-    #   kernel  kernel function
+    #   n       sample size
+    #   taper   tapering vector
 {
-    n = length(y) 
+    h4 = sum(taper ^ 4)
+    h2 = sum(taper ^ 2)
 
-    # Get indexes of Fourier frequencies.
-    freq = 2 * pi * seq(0, n - 1) / n
+    sqrt(n * h4) / h2
+}
 
-    # Use symmetry to improve the estimate.
-    y = c(head(rev(y), -1), y)
-    freq = c(head(-rev(freq), -1), freq)
+# Example of phi for computing spectral distribution F(0.5).
+# phi = function(x) ifelse(x <= 0.5 * pi, 1, 0)
 
-    f = function(u) {
-        value = numeric(length(u))
-        for (i in seq_along(u)) {
-            # Compute weights.
-            w = kernel((u[[i]] - freq) / b) / b
-            w = w / sum(w)
+#########################
+# Periodogram Functions #
+#########################
 
-            # Compute value.
-            v = w * log(y) - log(gamma(1 + w))
-            value[[i]] = exp(sum(v))
-        }
-        return(value)
-    }
-
-    return(f)
+fourier_freq = function(n, restrict = FALSE) 
+    # Compute the Fourier frequencies for a given sample size.
+    #
+    # Args:
+    #   n           sample size
+    #   restrict    whether or not to restrict to <= pi
+{
+    max_j = if (restrict) floor(n / 2) else n - 1
+    return(2 * pi * seq(0, max_j) / n)
 }
 
 periodogram = function(x, taper) 
@@ -137,7 +152,7 @@ tukey_hanning = function(n, rho)
     taper = rep(1, n)
 
     # Find upper cutoff. This is 0-indexed.
-    cutoff = floor(n * rho * 0.5)
+    cutoff = floor(n * rho / 2)
     x = seq(0, cutoff) / (n - 1)
 
     # Compute the taper.
@@ -150,4 +165,43 @@ tukey_hanning = function(n, rho)
     return(taper)
 }
 
+kernel_smooth = function(y, b, kernel) 
+    # Compute a kernel-smoothed estimate.
+    #
+    # Args:
+    #   y       sample points
+    #   b       bandwidth
+    #   kernel  kernel function
+{
+    n = length(y) 
+    freq = fourier_freq(n)
+
+    # Use symmetry to improve the estimate.
+    y = c(head(rev(y), -1), y)
+    freq = c(head(-rev(freq), -1), freq)
+
+    f = function(u) {
+        value = numeric(length(u))
+        for (i in seq_along(u)) {
+            # Compute weights.
+            w = kernel((u[[i]] - freq) / b) / b
+            w = w / sum(w)
+
+            # Compute value.
+            v = w * log(y) - log(gamma(1 + w))
+            value[[i]] = exp(sum(v))
+        }
+        return(value)
+    }
+
+    return(f)
+}
+
+epanechnikov = function(x) 
+    # Evaluate the Epanechnikov kernel.
+{
+    ifelse(abs(x) <= pi, 0.75 * pi * (1 - (x / pi)^2), 0)
+}
+
 main()
+
