@@ -34,7 +34,7 @@ example1 = function(seed = 506) {
     #plot(x)
 
     # ----- Periodogram & Spectral Density
-    taper = tukey_hanning(n, 0.01)
+    taper = tukey_hanning(n, 0.1)
     I = periodogram(x, taper)
 
     f_hat = kernel_smooth(I, 0.1, epanechnikov)
@@ -51,7 +51,7 @@ example1 = function(seed = 506) {
     stat = stat * correction
 
     # ----- Output
-    list(boot = boot, stat = stat)
+    list(boot = boot, stat = stat, I = I, f = f_hat)
 }
 
 example1_spectral = function(x) 
@@ -95,13 +95,17 @@ example2 = function(seed = 149) {
     x = ts(x[-(1:4)])
 
     # ----- Periodogram & Spectral Density
-    taper = tukey_hanning(n, 0.01)
+    taper = tukey_hanning(n, 0.1)
     I = periodogram(x, taper)
 
     f_hat = kernel_smooth(I, 0.05, epanechnikov)
 
     # ----- Bootstrap
     # Set phi for computing Whittle estimates for AR(4) model.
+    boot = NA
+    stat = NA
+
+    list(boot = boot, stat = stat, I = I, f = f_hat)
 }
 
 ###############
