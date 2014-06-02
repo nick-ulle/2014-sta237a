@@ -27,15 +27,13 @@ example1 = function() {
     # ----- Compute Periodogram
     taper = tukey_hanning(n, 0.01)
     I = periodogram(x, taper)
-    return(I)
 
     # ----- Compute Kernel Estimate
     f = kernel_smooth(I, 0.1, epanechnikov)
-    return(f)
 
     # ----- Bootstrap
     # Set phi for computing lag 1 autocorrelation.
-    phi = function(x) 2 * cos(x)
+    phi = function(x) cos(x)
     boot = spectral_bootstrap(2000, n, phi, f)
 
     return(boot)
@@ -88,15 +86,20 @@ kernel_smooth = function(y, b, kernel)
     #   b       bandwidth
     #   kernel  kernel function
 {
-    n = length(y)
+    n = length(y) 
+
     # Get indexes of Fourier frequencies.
-    x = 2 * pi * seq(0, n - 1) / n
+    freq = 2 * pi * seq(0, n - 1) / n
+
+    # Use symmetry to improve the estimate.
+    y = c(head(rev(y), -1), y)
+    freq = c(head(-rev(freq), -1), freq)
 
     f = function(u) {
         value = numeric(length(u))
         for (i in seq_along(u)) {
             # Compute weights.
-            w = kernel((u[[i]] - x) / b) / b
+            w = kernel((u[[i]] - freq) / b) / b
             w = w / sum(w)
 
             # Compute value.
