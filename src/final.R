@@ -16,16 +16,22 @@ example1 = function(seed = 506) {
     a = 0.9
     taper_pct = 0.1
 
-    # Sample uniform innovations.
-    z = runif(n, -sqrt(3), sqrt(3))
+    # Wrap simulation in a function so it can be replicated easily.
+    sim = function() {
+        # Sample uniform innovations.
+        z = runif(n, -sqrt(3), sqrt(3))
 
-    # Generate the observations.
-    x = numeric(n)
-    x[1] = z[1]
-    for (i in seq(2, n)) {
-        x[i] = a * x[i - 1] + z[i]
+        # Generate the observations.
+        x = numeric(n)
+        x[1] = z[1]
+        for (i in seq(2, n)) {
+            x[i] = a * x[i - 1] + z[i]
+        }
+
+        return(x)
     }
-    x = ts(x)
+
+    x = ts(sim())
 
     # ----- Periodogram & Spectral Density
     taper = tukey_hanning(n, taper_pct)
@@ -45,20 +51,26 @@ example1 = function(seed = 506) {
     stat = stat * correction
 
     # ----- CDFs
-    # First, compute the empirical CDF.
+    # First, compute the bootstrapped CDF.
     diffs = sqrt(n) * (boot - stat)
-    e_cdf = empirical_cdf(diffs)
+    b_cdf = empirical_cdf(diffs)
 
     # Next, compute the asymptotic CDF.
     a_taper = tukey_hanning(10^6, taper_pct)
     a_sd = taper_correction(a_taper) * sqrt(1 - a^2)
     a_cdf = function(x) pnorm(x, sd = a_sd)
     
-    # Finally, compute the true CDF.
+    # Finally, estimate the true CDF.
+    x_replicates = replicate(2000, sim())
+    ac_rep = apply(x_replicates, 2, estimate_ac, taper = taper, lag = 1)
+    diffs = sqrt(n) * (ac_rep - a)
+    t_cdf = empirical_cdf(diffs)
+
+    # ----- Plots
 
     # ----- Output
-    list(e_cdf, a_cdf)
-    #list(boot = boot, stat = stat, I = I, f = f_hat)
+    list(boot = boot, stat = stat, I = I, f = f_hat, b_cdf = b_cdf,
+         a_cdf = a_cdf, t_cdf = t_cdf)
 }
 
 example1_spectral = function(x) 
@@ -303,6 +315,38 @@ empirical_cdf = function(data)
     f_vec = function(x) sapply(x, f)
 
     return(f_vec)
+}
+
+right_shift = function(x, lag, pad = 0) 
+    # Shift a vector right, with padding.
+    #
+    # Args:
+    #   x       vector to shift
+    #   lag     number of positions to shift by
+    #   pad     padding value
+{
+    len = length(x)
+    if (lag > len)
+        return(rep(pad, len))
+
+    c(rep(0, lag), head(x, -lag))
+}
+
+estimate_ac = function(x, taper, lag, acf = TRUE)
+    # Estimate the autocorrelation or autocovariance  of a time series.
+    #
+    # Args:
+    #   x       time series
+    #   lag     lag to estimate
+    #   taper   taper vector
+    #   acf     whether to compute acf or acvf
+{
+    value = x * right_shift(x, lag) * taper * right_shift(taper, lag)
+
+    # Scale by lag-0 acvf for acf, or taper for acvf.
+    scaling = if (acf) sum((x * taper)^2) else sum(taper^2)
+    
+    return(sum(value) / scaling)
 }
 
 main = function() {
