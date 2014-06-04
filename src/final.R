@@ -5,9 +5,6 @@
 #   Included are spectral bootstrap methods, and code to reproduce both
 #   examples from the paper.
 
-main = function() {
-}
-
 #############
 # Example 1 #
 #############
@@ -17,6 +14,7 @@ example1 = function(seed = 506) {
     # ----- Simulation
     n = 64
     a = 0.9
+    taper_pct = 0.1
 
     # Sample uniform innovations.
     z = runif(n, -sqrt(3), sqrt(3))
@@ -29,12 +27,8 @@ example1 = function(seed = 506) {
     }
     x = ts(x)
 
-    x_bar = mean(x)
-    #x = x - x_bar
-    #plot(x)
-
     # ----- Periodogram & Spectral Density
-    taper = tukey_hanning(n, 0.1)
+    taper = tukey_hanning(n, taper_pct)
     I = periodogram(x, taper)
 
     f_hat = kernel_smooth(I, 0.1, epanechnikov)
@@ -45,13 +39,26 @@ example1 = function(seed = 506) {
     boot = spectral_bootstrap(2000, n, phi, f_hat)
 
     stat = spectral_statistic(n, phi, f_hat)
-    correction = taper_correction(n, taper)
+    correction = taper_correction(taper)
 
     boot = boot * correction
     stat = stat * correction
 
+    # ----- CDFs
+    # First, compute the empirical CDF.
+    diffs = sqrt(n) * (boot - stat)
+    e_cdf = empirical_cdf(diffs)
+
+    # Next, compute the asymptotic CDF.
+    a_taper = tukey_hanning(10^6, taper_pct)
+    a_sd = taper_correction(a_taper) * sqrt(1 - a^2)
+    a_cdf = function(x) pnorm(x, sd = a_sd)
+    
+    # Finally, compute the true CDF.
+
     # ----- Output
-    list(boot = boot, stat = stat, I = I, f = f_hat)
+    list(e_cdf, a_cdf)
+    #list(boot = boot, stat = stat, I = I, f = f_hat)
 }
 
 example1_spectral = function(x) 
@@ -122,8 +129,8 @@ spectral_bootstrap = function(n_boot, n, phi, f)
     # Args:
     #   n_boot      number of bootstrap replicates
     #   n           number of observations in original sample
-    #   phi         statistic function
-    #   f           spectral density function
+    #   phi         ratio statistic function
+    #   f           spectral density function (or estimate)
     #
     # Returns:
     #   A vector of bootstrapped statistics.
@@ -146,20 +153,30 @@ spectral_bootstrap = function(n_boot, n, phi, f)
 
 spectral_statistic = function(n, phi, f) 
     # Approximate a spectral ratio statistic.
+    #
+    # Args:
+    #   n           number of observations in original sample
+    #   phi         ratio statistic function
+    #   f           spectral density function (or estimate)
 {
-    freq = fourier_freq(n)
+    freq = fourier_freq(n, restrict = TRUE)
 
     # Note: the factors of pi cancel out.
     mean(phi(freq) * f(freq)) / mean(f(freq))
 }
 
-taper_correction = function(n, taper)
-    # Compute tapering correction factor.
+taper_correction = function(taper)
+    # Compute taper correction factor for the bootstrap.
+    #
+    # This function can also be used to approximate the asymptotic taper
+    # correction factor, by supplying a taper corresponding to a very large
+    # sample size (e.g., 10^6).
     #
     # Args:
-    #   n       sample size
-    #   taper   tapering vector
+    #   taper   taper vector
 {
+    n = length(taper)
+
     h4 = sum(taper ^ 4)
     h2 = sum(taper ^ 2)
 
@@ -195,26 +212,30 @@ periodogram = function(x, taper)
     if (missing(taper))
         taper = rep(1, length(x))
 
+    # Always detrend, as per the definition.
+    x = x - mean(x)
+
+    # The sum() is the fft of taper^2 at frequency 0.
     norm = 2 * pi * sum(taper^2)
     Mod(fft(taper * x))^2 / norm
 }
 
-tukey_hanning = function(n, rho) 
+tukey_hanning = function(n, taper_pct) 
     # Compute a Tukey-Hanning taper.
     #
     # Args:
-    #   n       number of points
-    #   rho     proportion to taper
+    #   n           number of points
+    #   taper_pct   proportion to taper
 {
     taper = rep(1, n)
 
     # Find upper cutoff. This is 0-indexed.
-    cutoff = floor(n * rho / 2)
+    cutoff = floor(n * taper_pct / 2)
     x = seq(0, cutoff) / (n - 1)
 
     # Compute the taper.
     tapered = seq_along(x)
-    taper[tapered] = 0.5 * (1 - cos(2*pi * x / rho))
+    taper[tapered] = 0.5 * (1 - cos(2*pi * x / taper_pct))
 
     # Reflect the taper so the result is symmetric.
     taper[n - tapered + 1] = taper[tapered]
@@ -258,6 +279,33 @@ epanechnikov = function(x)
     # Evaluate the Epanechnikov kernel.
 {
     ifelse(abs(x) <= pi, 0.75 * pi * (1 - (x / pi)^2), 0)
+}
+
+#####################
+# Utility Functions #
+#####################
+
+empirical_cdf = function(data) 
+    # Make a vectorized empirical CDF.
+    #
+    # Args:
+    #   data    sample to base the empirical CDF on
+{
+    data = sort(data)
+    n = length(data)
+
+    f = function(x) {
+        cutoff = match(F, data <= x, nomatch = n + 1) - 1
+        if (cutoff == 0) 0 else cutoff / n
+    }
+
+    # Vectorize the empirical cdf.
+    f_vec = function(x) sapply(x, f)
+
+    return(f_vec)
+}
+
+main = function() {
 }
 
 main()
