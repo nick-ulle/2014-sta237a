@@ -1,0 +1,86 @@
+\documentclass{beamer}
+%
+% Choose how your presentation looks.
+%
+% For more themes, color themes and font themes, see:
+% http://deic.uab.es/~iblanes/beamer_gallery/index_by_theme.html
+%
+\mode<presentation>
+{
+  \usetheme{Warsaw}      % or try Darmstadt, Madrid, Warsaw, ...
+  \usecolortheme{beaver} % or try albatross, beaver, crane, ...
+  \usefonttheme{default}  % or try serif, structurebold, ...
+  \setbeamertemplate{navigation symbols}{}
+  \setbeamertemplate{caption}[numbered]
+} 
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+% ----- Packages ----- %
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{lmodern}
+
+% ----- AMS -----
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+
+%\usepackage{amsthm} % Must come after amsmath.
+
+\usepackage{mathtools}
+\usepackage{dsfont}
+
+\usepackage{graphicx}
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+% ----- Commands ----- %
+%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\on}[1]{\operatorname{ \mathds{1}}_\text{$#1$} }
+
+\newcommand{\inD}{\mathop{\overset{\mathrm{d}}{\longrightarrow}}}
+
+\newcommand{\dist}[1]{\operatorname{#1}}
+\newcommand{\iid}{\overset{\mathrm{iid}}{\sim}}
+
+
+%\usepackage[english]{babel}
+%\usepackage[utf8x]{inputenc}
+
+\title[Frequency-Domain Bootstrap]{The Frequency-Domain Bootstrap of \\Dahlhaus \& Janas}
+\author{Dmitriy Izyumin, Eugene Shvarts, Nick Ulle}
+\institute{Final Project for Prof. Aue's STA 237A, Time Series Analysis}
+\date{June 5, 2014}
+
+\begin{document}
+
+\begin{frame}[plain]
+  \titlepage
+\end{frame}
+
+% Uncomment these lines for an automatically generated outline.
+%\begin{frame}{Outline}
+%  \tableofcontents
+%\end{frame}
+
+\section{Introduction}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Dmitriy's Introduction section
+%include subsections -- e.g., Ratio Statistics, Examples
+\input{d_slides.tex} 		%uncomment this line to insert your slides
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{The Bootstrap Approximation}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Eugene's The Bootstrap Approximation section
+%include subsections -- e.g., Algorithm, Assumptions, Validity
+%\input{e_slides.tex} 		%uncomment this line to insert your slides
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Empirical Examples}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Nick's Numerical Experiments section
+%include subsections -- e.g., Reproduced Simulations, Estimation of ___, Discussion, ...
+\input{n_slides.tex} 		%uncomment this line to insert your slides
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}

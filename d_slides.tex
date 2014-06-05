@@ -1,0 +1,95 @@
+
+\subsection{Bootstrapping and Time Series}
+\begin{frame}{Bootstrapping and Time Series}
+
+\begin{itemize}
+\item Bootstrapping is based on resampling i.i.d. variables
+
+\item How to deal with the dependence structure of time series?
+
+\item Need (approximately) i.i.d. variables
+\begin{itemize}
+\item Time Domain: residuals, innovations
+\item Frequency Domain: (Studentized) periodogram ordinates
+\end{itemize}
+
+\item Paper describes favorable properties of the latter
+
+\end{itemize}
+\end{frame}
+
+
+
+\subsection{Spectral Mean}
+\begin{frame}{Spectral Mean}
+\begin{itemize}
+
+\item $\phi = (\phi^{(1)},\cdots,\phi^{(d)})$, each $\phi^{(i)}$ of bounded variation
+
+\item $I_T$ - tapered periodogram
+
+\item Spectral mean $A(\phi, f) = \int_0^\pi \phi(\alpha)f(\alpha)d\alpha$
+
+\item Canonical estimate $A(\phi,I_T) = \int_0^\pi \phi(\alpha)I_T(\alpha)d\alpha$
+
+\end{itemize}
+\end{frame}
+
+
+
+\begin{frame}{Spectral Mean - Important Examples}
+\begin{itemize}
+
+\item Autocovariance estimate $\hat{\gamma}(u), u \in \mathbb{Z}$\\
+$\phi(\alpha) = 2\cos(\alpha u)$
+
+\item Spectral distribution function estimate $\hat{F}_T(\lambda)$\\
+$\phi(\alpha) = \on{[0,\lambda]}(\alpha)$
+
+\end{itemize}
+\end{frame}
+
+
+
+\subsection{Ratio Statistics}
+\begin{frame}{Ratio Statistics - Definition}
+\begin{itemize}
+
+\item Normalized spectral density: $g(\alpha)=\frac{f(\alpha)}{F(\pi)}$
+
+\item Estimate: $J_T(\alpha)=\frac{I_T(\alpha)}{\hat{F}_T(\pi)}$
+
+\item Ratio statistic: $A(\phi,J_T)=\frac{\int_0^\pi \phi(\alpha)I_T(\alpha)d\alpha}{\int_0^\pi I_T(\alpha)d\alpha} = \frac{A(\phi,I_T)}{A(1,I_T)}$
+
+\end{itemize}
+\end{frame}
+
+
+
+\begin{frame}{Ratio Statistics - Important Examples}
+\begin{itemize}
+
+\item Autocorrelation estimate $\hat{\rho}_T(u), u \in \mathbb{Z}$\\
+$\phi(\alpha)=\cos(\alpha u)$
+
+\item Normalized sdf estimate $\hat{F}_T(\lambda) / \hat{F}_T(\pi)$\\
+$\phi(\alpha) = \on{[0,\lambda]}(\alpha)$
+
+\end{itemize}
+\end{frame}
+
+
+
+\begin{frame}{Whittle Estimators}
+\begin{itemize}
+
+\item Parametric family of spectral densities: $\mathcal{F}=\{f_\theta: \theta \in \Theta\}, \Theta \in \mathbb{R}$
+
+\item Whittle's likelihood: $\mathcal{L}_T(\theta) = \frac{1}{2\pi}\int_0^\pi \left[ \log f_\theta (\alpha) + \frac{I_T(\alpha)}{f_\theta(\alpha)} \right]d\alpha$
+
+\item $\hat{\theta}$ obtained by minimizing $\mathcal{L}_T(\theta)$
+
+\item Spectral mean with $\phi(\alpha) = \nabla \frac{1}{f_\theta}(\alpha)$
+
+\end{itemize}
+\end{frame}
