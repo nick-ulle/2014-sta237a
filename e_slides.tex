@@ -1,0 +1,75 @@
+ \subsection{Bootstrap Periodogram}
+ 
+ \begin{frame}{Spectral Mean Distribution}
+If we were to Studentize our periodogram values $\{I_j\}$ with estimated spectral density $\hat f$ in order to obtain bootstrap values $\{I_j^*\}$, we could form the bootstrap approximation 
+$$
+B(\phi,I_T^*) := \frac{\pi}{n} \sum_{j=1}^n \phi_j I_j^*~~\text{, where}~~\phi_j := \phi(2\pi j/T)~~.
+$$ \pause
+
+Under appropriate conditions ...
+ \begin{itemize}
+ \item $\sqrt T \bigl( A(\phi,I_T) - A(\phi,f)\bigr)$ is asymptotically normal with variance $=~~2\pi \int \phi^2 f^2 + (\kappa_4 / \sigma^4)\left(\int \phi f\right)^2~$.
+ \item $\sqrt T \bigl( B(\phi,I_T^*) - B(\phi,\hat f)\bigr)$ is asymptotically normal with variance $\propto~~2\pi \int \phi^2 f^2~$.
+ \pause
+ \end{itemize}
+ For ratio statistics, second term vanishes!
+ \end{frame}
+ 
+ \begin{frame}{Algorithm}
+ Let $n = \lceil T/2\rceil$ and $I_j := I_T(2\pi j/T)$. 
+ \begin{enumerate}
+ \item Obtain periodogram sample values $\{I_j\},~ j=1:n$.
+ \item Obtain estimate $\hat f$ of spectral density $f$ (e.g., kernel estimate).
+\pause
+ \item Obtain Studentized periodogram samples $\hat\epsilon_j := I_j / \hat f_j$.
+ \item Rescale the $\hat\epsilon_j$'s by their mean, so that $\tilde\epsilon_j := \hat\epsilon_j / \{(1/n) \sum_j \hat\epsilon_j\}$.
+ \pause
+ \item Sample the empirical distribution of $\{\tilde\epsilon_j\}$ to obtain a bootstrap sample $\{\epsilon^*_j\}$ (whose size may differ from $n$).
+ \item Define bootstrap periodogram values via $I_j^* := \hat f_j \epsilon^*_j$.
+ 
+ \end{enumerate}
+ \end{frame}
+
+ \subsection{Validity}
+ 
+ \begin{frame}{Some Assumptions}
+ Performance guarantee of the bootstrap approximation requires ...
+ \begin{itemize}
+ \item $\{X_t:t\in\mathbb Z\}$ is a real-valued linear process: $X_t = \sum_{u\in\mathbb Z} a_u \xi_{t-u}$ The $\{\xi_t\}$ satisfy $\mathbb E \xi_1 = 0$, $\mathbb E \xi_1^2 = 1$, $\mathbb E \xi_1^8 <\infty$, $\mathbb E \xi_t^3 = 0$. \\ The $\{a_t\}$ satisfy $\sum_t t^2 |a_t| < \infty$.
+ \item $\sup_{\alpha\in[0,\pi]} |\hat f(\alpha) - f(\alpha)| \to 0$ almost surely.
+ \item $\phi$ is a $d$-dimensional vector of BV functions $\phi^{(r)}:[0,\pi]\to\mathbb R$, each with even periodic extension to all of $\mathbb R$. 
+ \item The taper $h_t$ has the form $h_t := h(t/T)$, with $h:\mathbb R\to[0,1]$ a BV function with support in $(0,1]$.
+ \end{itemize}
+ \end{frame}
+ 
+ \begin{frame}{More Technical Assumptions}
+Edgeworth expansions are used to show that we outperform the normal approximation. For these we need  ...
+ \begin{itemize}
+\item  The $\{a_t\}$ and Fourier coefficients $\{\hat\phi (\omega)\}$ vanish exponentially. That is, for a fixed $\tau \in (0,1)$, $|a_t| \le \tau^{|t|}$ and $\|\hat\phi(\omega)\| \le \tau^{|\omega|}$.
+\item several other detailed technical assumptions on $h$, $\xi$, and $\phi$ (more than five minutes allow! See the paper).
+ \end{itemize}
+ \end{frame}
+ 
+\begin{frame}{Convergence Rate}
+\only<1>{
+\begin{itemize}
+\item To bootstrap the distribution of $A(\phi,J_T)-A(\phi,g)$, use the statistic $B(\phi,J_T^*)-B(\phi,\hat g)$, where $\hat g_j := \hat f_j / \{(\pi/n) \sum_k \hat f_k\}$.
+\item Let $D_T^2 = V_T^{-1}$, where $V_T$ is the covariance matrix of $\sqrt T A(\phi,J_T)$. Define $\hat D_T$ analogously via $\sqrt T B(\phi,J_T^*)$.
+\item Let $P^*$ denote the conditional distribution given the data.
+\end{itemize} }
+
+\begin{block}{Theorem}
+Suppose the assumptions stated in the paper hold. Then for almost all samples $\{I_j\}$, 
+$$
+\sup_C \left| P\bigl( \sqrt T D_T(A(\phi,J_T) - A(\phi,g)) \in C \bigr) \right. - $$ $$
+\left. P^*\bigl(\sqrt T \hat D_T(B(\phi,J_T^*)-B(\phi,\hat g)) \in C  \bigr)\right| = o(T^{-1/2})~~.
+$$
+The $\sup$ is taken over convex measurable subsets of $\mathbb R^d$. 
+\end{block}
+
+\uncover<2>{
+In short, estimating the distribution of the standardized spectral density by resampling from the standardized periodogram is consistent, and the convergence rate is asymptotically better than that achieved by the normal approximation. 
+}
+\end{frame} 
+ 
+ 
