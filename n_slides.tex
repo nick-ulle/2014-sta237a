@@ -1,5 +1,6 @@
 
-\begin{frame}{Simulation Example}
+\subsection{Simulation Example}
+\begin{frame}{Setup}
 Simulate the $\textrm{AR}(1)$ process $X_t = 0.9 X_{t-1} + Z_t$.
 \begin{itemize}
     \item
@@ -19,7 +20,7 @@ Simulate the $\textrm{AR}(1)$ process $X_t = 0.9 X_{t-1} + Z_t$.
 \begin{frame}{Series Plot}
     \begin{figure}
     \centering
-    \includegraphics[width = 0.7\textwidth]{res/ex1.png}
+    \includegraphics[width = 0.95\textwidth]{res/ex1.png}
     \end{figure}
 \end{frame}
 
@@ -40,7 +41,7 @@ Simulate the $\textrm{AR}(1)$ process $X_t = 0.9 X_{t-1} + Z_t$.
 
 % Include plots of the Tukey-Hanning taper and the Epanechnikov kernel.
 
-\begin{frame}{Estimator Distribution}
+\begin{frame}{Error Distribution}
 \begin{itemize}
     \item
     Since $\hat{\rho}(1)$ is the Yule-Walker estimate for the AR parameter,
@@ -64,17 +65,37 @@ Simulate the $\textrm{AR}(1)$ process $X_t = 0.9 X_{t-1} + Z_t$.
 \begin{frame}{Distributions Plot}
     \begin{figure}
     \centering
-    \includegraphics[width = 0.7\textwidth]{res/ex1_cdf.png}
+    \includegraphics[width = 0.95\textwidth]{res/ex1_cdf.png}
     \end{figure}
 \end{frame}
 
-\begin{frame}{Applied Example}
+\subsection{Applied Example}
+\begin{frame}{Series Plot}
     \begin{figure}
     \centering
-    \includegraphics[width = 0.7\textwidth]{res/exA.png}
+    \includegraphics[width = 0.95\textwidth]{res/exA.png}
     \end{figure}
 \end{frame}
 
-\begin{frame}{Results}
+\begin{frame}{Spectral Density Estimate}
+    \begin{figure}
+    \centering
+    \includegraphics[width = 0.95\textwidth]{res/exA_spec.png}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Autocorrelation Estimates}
+    \begin{itemize}
+    \item
+    Lag-1 autocorrelation confidence interval $(0.5234, 0.5787)$.
+
+    \item
+    Lag-2 autocorrelation confidence interval $(0.2041, 0.2917)$.
+    \end{itemize}
+
+    \begin{figure}
+    \centering
+    \includegraphics[width = 0.75\textwidth]{res/exA_cdf.png}
+    \end{figure}
 \end{frame}
 
