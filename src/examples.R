@@ -44,6 +44,7 @@ example1 = function(seed = 506)
     I = periodogram(x, taper)
 
     f_hat = kernel_smooth(I, 0.1, epanechnikov)
+    f_hat2 = kernel_smooth(I, 0.05, epanechnikov)
 
     # ----- Bootstrap
     # Set phi for computing lag 1 autocorrelation.
@@ -79,13 +80,19 @@ example1 = function(seed = 506)
     dev.off()
 
     # Plot the spectral density and the estimate.
+    png('../res/ex1_spec.png', height = 8, width = 12, units = 'in', res = 300)
+    curve(example1_spectral, -pi, pi, main = 'Spectral Density With Estimates',
+          xlab = 'Frequency', ylab = 'Magnitude')
+    curve(f_hat, -pi, pi, add = TRUE, lty = 'dotted', col = 'blue')
+    curve(f_hat2, -pi, pi, add = TRUE, lty = 'dashed', col = 'red')
+    dev.off()
 
     # Plot the CDFs.
     png('../res/ex1_cdf.png', height = 8, width = 12, units = 'in', res = 300)
     curve(t_cdf, -2.5, 1.5, main = 'Cummulative Distribution Functions',
-          xlab = 'x', ylab = 'F(x)', col = 'red')
+          xlab = 'x', ylab = 'F(x)')
     curve(b_cdf, -2.5, 1.5, lty = 'dotted', add = TRUE, col = 'blue')
-    curve(a_cdf, -2.5, 1.5, lty = 'dashed', add = TRUE)
+    curve(a_cdf, -2.5, 1.5, lty = 'dashed', add = TRUE, col = 'red')
     dev.off()
 
     # ----- Output
