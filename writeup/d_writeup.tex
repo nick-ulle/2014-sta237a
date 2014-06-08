@@ -1,0 +1,62 @@
+
+\subsection*{Bootstrapping Time Series}
+Since its introduction over three decades ago, the bootstrap has become a popular and widely applicable tool of statistical inference. At times, bootstrapping can provide valuable insight into the distributions of statistics, which would be unattainable by any analytical procedures. Over the years, numerous modifications and extensions of the original algorithm have made it possible to implement bootstrapping procedures in a variety of settings.
+
+In the time series framework, observations are generally not independent and the dependence structure is a key object of interest. Moreover, there is usually an absence of repeated measurements, as only one realization of the process is observed. Since the bootstrap is based on the resampling of i.i.d objects, these two complications make the extension of the bootstrap to time series analysis a challenge.
+
+The difficulties above may be overcome either by resampling whole blocks of observations (moving block bootstrap), or by first somehow transforming the data into i.i.d. objects and then resampling those. Examples of such i.i.d. transformations of the data are residuals and innovations in the time domain, or periodogram ordinates in the frequency domain. Dahlhaus and Janas outline a bootstrap procedure based on the resampling of Studentized tapered periodogram ordinates, and show that under reasonable assumptions the procedure has very favorable properties when dealing with an important class of ratio statistics \cite{bootstrap}.
+
+\subsection*{Spectral Means and Ratio Statistics}
+
+Consider a real-valued, stationary, zero-mean time series $\{X_t \}_{t\in\mathbb{Z}}$, of which realizations $t=1,\cdots,T$ are observed. The usual estimate of the spectral density function $f(\alpha)$ is the smoothed periodogram constructed from the observed data. For additional smoothing, the tapered periodogram, denoted by $I_T(\alpha)$, will be used instead. A brief motivation of tapering can be found in the \textit{Empirical Examples} section, and Dahlhaus and Janas provide a detailed description of the procedure in their publication.
+
+For any $\phi = (\phi^{(1)},\cdots,\phi^{(d)})$, where each $\phi^{(i)}$ of bounded variation, the \textit{spectral mean} is defined as
+	\[
+	A(\phi, f) = \int_0^\pi \phi(\alpha)f(\alpha)d\alpha,
+	\]
+and the canonical estimate is given by
+	\[
+	A(\phi,I_T) = \int_0^\pi \phi(\alpha)I_T(\alpha)d\alpha
+	\]
+
+Now consider the normalized spectral density $g(\alpha) = \frac{f(\alpha)}{F(\pi)}$, where $F$ is the spectral distribution function. A natural estimate of this quantity is the normalized tapered periodogram, $J_T(\alpha)=\frac{I_T(\alpha)}{\hat{F}_T(\pi)}$, where $\hat{F}_T(\alpha)$ is the estimate of the spectral distribution function obtained using the tapered periodogram. The \textit{normalized spectral mean} is obtained when $g$ is plugged into $A(\phi,\cdot)$ in place of $f$,
+	\[
+	 A(\phi,g)=\frac{\int_0^\pi \phi(\alpha)f(\alpha)d\alpha}{\int_0^\pi f(\alpha)d\alpha} = \frac{A(\phi,f)}{A(1,f)},
+	\]
+and its estimate is obtained by similarly replacing $I_T$ by $J_T$,
+
+	\[
+	 A(\phi,J_T)=\frac{\int_0^\pi \phi(\alpha)I_T(\alpha)d\alpha}{\int_0^\pi I_T(\alpha)d\alpha} = \frac{A(\phi,I_T)}{A(1,I_T)}
+	\]
+Since the estimate can be expressed as a ratio of two spectral mean estimates, its is known as a \textit{ratio statistic}.
+
+
+\subsection*{Examples}
+
+The sample means and ratio statistics are both notable classes of statistics. Since it is only required that $\phi(\alpha)$ is bounded in variation, a great number of functions may be chosen for $\phi$, resulting in many different statistics and estimates. Below are several important estimates that can be expressed as either $A(\phi, I_T)$ or $A(\phi, J_T)$ with proper choice of $\phi$:\\
+
+\begin{table}
+\centering
+\begin{tabular}{ccc}
+\toprule
+$\phi(\alpha)$ & $A(\phi,I_T)$ & $A(\phi,J_T)$ \\
+\midrule
+$\cos(\alpha u)$ & Autocovariance $\hat{\gamma}(u), u \in \mathbb{Z}$  &  Autocorrelation $\hat{\rho}_T(u), u \in \mathbb{Z}$ \\
+$\on{[0,\lambda]}(\alpha)$ & Spectral Distribution Function $\hat{F}_T(\lambda)$ & Normalized SDF $\frac{\hat{F}_T(\lambda)}{\hat{F}_T(\pi)}$\\
+\bottomrule
+\end{tabular}
+\caption{Useful spectral means and ratio statistics.}
+\end{table}
+
+
+\subsection*{Whittle Estimators}
+Consider the problem of selecting a parameter $\theta$ from a parameter family $\Theta \in \mathbb{R}$ with the corresponding family of spectral densities $\mathcal{F}=\{f_\theta: \theta \in \Theta\}, \Theta \in \mathbb{R}$. The Whittle estimate of the parameter, $\hat{\theta}$, is obtained by minimizing Whittle's likelihood function,
+	\[
+	 \mathcal{L}_T(\theta) = \frac{1}{2\pi}\int_0^\pi \left[ \log f_\theta (\alpha) + \frac{I_T(\alpha)}{f_\theta(\alpha)} \right]d\alpha.
+	\]
+The likelihood $\mathcal{L}_T(\theta)$ can be interpreted as the distance between the (tapered) periodogram $I_T$ and the candidate spectral density $f_\theta$. In some settings Whittle estimates have very favorable properties and may be preferred over methods relying on the traditional likelihood \cite{fox}.
+
+Notably, a Whittle estimator can be expressed as a spectral mean $A(\phi,I_T)$ with $\phi(\alpha) = \nabla \frac{1}{f_\theta}(\alpha)$. Using this fact, Dahlhaus and Janas extend their ideas to Whittle estimates, and show that their bootstrap algorithm has favorable properties when working with Whittle estimates as well.
+
+
+
