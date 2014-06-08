@@ -7,9 +7,10 @@ and the resulting discontinuity at the endpoints generates noise,
 or \textit{leakage}, in the periodogram.
 Smoothing the tails of the sample towards zero,
 a process known as \textit{tapering},
-eliminates the discontinuity and can help to alleviate leakage.
+eliminates the discontinuity and can help to alleviate leakage \cite{shumway}.
 Following the procedure of Dahlhaus and Janas,
-a $10\%$ Tukey-Hanning taper was used for all examples presented here.
+a $10\%$ Tukey-Hanning taper (see \cite{dahlhaus}) 
+was used for all examples presented here.
 Small changes to the taper proportion had little, if any,
 effect on the smoothed spectral density estimate $\hat{f}$.
 In practice, other tapers can be used with the frequency domain bootstrap.
@@ -107,6 +108,9 @@ distribution.
 This result is especially impressive because the spectral density estimate
 was not very good---smoothing masked the peak at zero.
 Repeated simulations show similarly positive results.
+Finally, we note that the true lag-1 autocorrelation 0.9 typically did fall
+within the 95\% confidence intervals produced using the bootstrapped error
+distribution.
     \begin{figure}[ht]
     \centering
     \includegraphics[width = 0.8\textwidth]{../res/ex1_cdf.png}
@@ -119,11 +123,70 @@ Repeated simulations show similarly positive results.
     \end{figure}
 
 \subsection*{Application}
+Now we turn our attention to an application of the frequency domain bootstrap.
+The Melbourne temperatures time series \cite{melbourne} records the daily 
+minimum temperature (in $\phantom{}^\circ$ Celsius) in Melbourne,
+Australia from the beginning of 1981 to the end of 1990.
     \begin{figure}[ht]
     \centering
     \includegraphics[width = 0.8\textwidth]{../res/exA.png}
     \caption{
         The Melbourne temperatures time series used in the application.
         }
-    \label{ex1_cdf}
+    \label{exA}
     \end{figure}
+Shown in Figure~\ref{exA}, this time series exhibits a strong oscillations with
+approximate period 365.
+It follows that there is a sharp peak in the spectral density in the
+vicinity of $2\pi / 365 \approx 0$, somewhat similar to the first example.
+Again, this makes estimation of the spectral density function difficult,
+because the mode may be diminished by smoothing.
+    \begin{figure}[ht]
+    \centering
+    \includegraphics[width = 0.8\textwidth]{../res/exA_spec.png}
+    \caption{
+        Spectral density estimates for the Melbourne temperature time series,
+        with bandwidth 0.01 (dotted, blue), 0.05 (dashed, red), and 0.1
+        (solid, black).
+        }
+    \label{exA_spec}
+    \end{figure}
+
+Estimates for the spectral density are shown in Figure~\ref{exA_spec}.
+Bandwidths 0.01, 0.05, and 0.1 were considered.
+At the narrowest of these, the peak near zero appears to be well-preserved,
+but great deal of noise is also preserved at higher frequencies.
+On the other hand, the widest bandwidth loses both the shape and height of the
+mode. Based on this, only the bandwidth 0.01 and 0.05 estimates were used in
+the bootstrap procedure.
+
+    \begin{table}[h]
+    \centering
+    \begin{tabular}{lrr}
+    \toprule
+    & Lag-1 & Lag-2 \\
+    \midrule
+    0.01 & $(0.547, 0.618)$ & $(0.236, 0.357)$ \\
+    0.05 & $(0.524, 0.580)$ & $(0.206, 0.291)$ \\
+    \texttt{acf()} & $0.774$ & $0.630$ \\
+    \bottomrule
+    \end{tabular}
+    \caption{
+        Autocorrelation estimates for the Melbourne temperatures time series,
+        using two different bandwidths and the \texttt{acf()} function.}
+    \label{exA_est}
+    \end{table}
+
+The frequency domain bootstrap was used to compute confidence intervals for the
+lag-1 and lag-2 autocorrelations.
+The results are shown in Table~\ref{exA_est}.
+For reference, these autocorrelations were also estimated with R's
+$\texttt{acf()}$ function.
+Using the smaller bandwidth, 0.05, gives slightly larger estimates,
+although all of the bootstrapped estimates are substantially smaller than the
+reference estimates.
+This behavior seems to indicate that there is a serious penalty for the
+attenuation of the mode,
+and the results of the frequency domain bootstrap should be viewed with
+scrutiny in applications where strong seasonality is present.
+

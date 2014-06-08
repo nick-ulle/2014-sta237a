@@ -118,7 +118,6 @@ exampleA = function()
     x = read.csv('../data/melbourne_temps.csv', 
                  colClasses = c('Date', 'numeric'))
     x = ts(x$Temperature, frequency = 365, start = c(1980, 1))
-    return(x)
 
     n = length(x)
 
@@ -130,46 +129,40 @@ exampleA = function()
     f_hat2 = kernel_smooth(I, 0.05, epanechnikov)
     f_hat3 = kernel_smooth(I, 0.1, epanechnikov)
 
-    # Take the middle path.
-    f_hat = f_hat2
+    # Bandwidth 0.1 smooths too aggressively, so only the first two will be
+    # given further consideration.
+    f_hat = c(f_hat1, f_hat2)
     
-    # ----- Bootstrap
-    # TODO: Clean up this section for final report.
-    # Set phi for computing lag 1 autocorrelation.
-    phi = function(x) cos(x)
-    boot = spectral_bootstrap(2000, n, phi, f_hat)
-
-    stat = spectral_statistic(n, phi, f_hat)
+    # ----- Bootstrap Lag-1
     correction = taper_correction(taper)
 
-    boot = boot * correction
-    stat = stat * correction
+    boot_lag1 = list()
+    stat_lag1 = list()
+    cat('Lag-1 Autocorrelation\n')
+    for (j in 1:2) {
+        # Use cos() to compute lag 1 autocorrelation.
+        boot_lag1[[j]] = spectral_bootstrap(2000, n, cos, f_hat[[j]]) *
+            correction
+        stat_lag1[[j]] = spectral_statistic(n, cos, f_hat[[j]]) * correction
 
-    diffs = sqrt(n) * (boot - stat)
-    quant = quantile(diffs, c(0.025, 0.975))
-    interval = mean(boot) + quant / sqrt(n)
-    cat(paste0('Lag-1 autocorrelation estimate ', mean(boot),
-               ' has confidence interval (', interval[[1]], ', ',
-               interval[[2]], ').\n'))
-    b_cdf1 = empirical_cdf(diffs)
+        show_conf95(boot_lag1[[j]], stat_lag1[[j]], n)
+    }
 
+    # ----- Bootstrap Lag-2
     # Set phi for computing lag 2 autocorrelation.
     phi = function(x) cos(2*x)
-    boot = spectral_bootstrap(2000, n, phi, f_hat)
 
-    stat = spectral_statistic(n, phi, f_hat)
-    correction = taper_correction(taper)
+    boot_lag2 = list()
+    stat_lag2 = list()
+    cat('\nLag-2 Autocorrelation\n')
+    for (j in 1:2) {
+        # Use cos() to compute lag 1 autocorrelation.
+        boot_lag2[[j]] = spectral_bootstrap(2000, n, phi, f_hat[[j]]) *
+            correction
+        stat_lag2[[j]] = correction * spectral_statistic(n, phi, f_hat[[j]])
 
-    boot = boot * correction
-    stat = stat * correction
-
-    diffs = sqrt(n) * (boot - stat)
-    quant = quantile(diffs, c(0.025, 0.975))
-    interval = mean(boot) + quant / sqrt(n)
-    cat(paste0('Lag-2 autocorrelation estimate ', mean(boot),
-               ' has confidence interval (', interval[[1]], ', ',
-               interval[[2]], ').\n'))
-    b_cdf2 = empirical_cdf(diffs)
+        show_conf95(boot_lag2[[j]], stat_lag2[[j]], n)
+    }
 
     # ----- Plots
     # Plot the process.
@@ -183,16 +176,30 @@ exampleA = function()
     png('../res/exA_spec.png', height = 8, width = 12, units = 'in', res = 300)
     curve(f_hat1, -2, 2, lty = 'dotted', main = 'Spectral Density Estimates',
           xlab = 'Frequency', ylab = 'Magnitude', col = 'blue')
-    curve(f_hat2, -2, 2, lty = 'dashed', add = TRUE)
-    curve(f_hat3, -2, 2, add = TRUE, col = 'red')
+    curve(f_hat2, -2, 2, lty = 'dashed', add = TRUE, col = 'red')
+    curve(f_hat3, -2, 2, add = TRUE)
     dev.off()
 
     # Plot the CDFs.
-    png('../res/exA_cdf.png', height = 8, width = 12, units = 'in', res = 300)
-    curve(b_cdf1, -3, 3, main = 'Cummulative Distribution Functions',
-          xlab = 'x', ylab = 'F(x)')
-    curve(b_cdf2, -3, 3, lty = 'dotted', col = 'blue', add = TRUE)
-    dev.off()
+    #png('../res/exA_cdf.png', height = 8, width = 12, units = 'in', res = 300)
+    #curve(b_cdf1, -3, 3, main = 'Cummulative Distribution Functions',
+          #xlab = 'x', ylab = 'F(x)')
+    #curve(b_cdf2, -3, 3, lty = 'dotted', col = 'blue', add = TRUE)
+    #dev.off()
+
+    # ----- Output
+    cat('\nEstimates from acf():\n')
+    print(acf(x, lag.max = 2, plot = FALSE))
+    invisible()
+}
+
+show_conf95 = function(boot, stat, n) {
+    diffs = sqrt(n) * (boot - stat)
+    quant = quantile(diffs, c(0.025, 0.975))
+    interval = mean(boot) + quant / sqrt(n)
+
+    cat(paste0('Estimate ', mean(boot), ' with 95% CI (', interval[[1]], 
+               ', ', interval[[2]], ').\n'))
 }
 
 main()
