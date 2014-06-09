@@ -16,12 +16,21 @@ Hence, the latter statistic will only be useful for a bootstrap procedure if the
 \item Sample the empirical distribution of $\{\tilde\epsilon_j\}$ to obtain a bootstrap sample $\{\epsilon^*_j\}$. 
 \item Define bootstrap periodogram values via $I_j^* := \hat f_j \epsilon^*_j$.
 \end{enumerate}
+Note that it's also possible to skip steps 1--5 by sampling directly from an
+exponential distribution with mean 1.
+This alternate procedure has the same convergence properties as the one
+outlined above, but may also avoid biases introduced by the Studentization,
+and is therefore preferable.
 
 \subsection*{Assumptions}
 
 In order to estimate the distribution of the approximation error $A(\phi,I_T) - A(\phi,f)$ by that of $B(\phi,I_T^*) - B(\phi,\hat f)$, the time series and desired spectral mean must be sufficiently nice; we describe some conditions and their relationship with the result. 
-\begin{itemize}
-\item First, $\{X_t:t\in\mathbb Z\}$ must be a real-valued linear process: $X_t = \sum_{u\in\mathbb Z} a_u \xi_{t-u}$. \\ The $\{\xi_t\}$ satisfy $\mathbb E \xi_1 = 0$, $\mathbb E \xi_1^2 = 1$, $\mathbb E \xi_1^8 <\infty$, $\mathbb E \xi_t^3 = 0$. The first two conditions are necessary for weak stationarity. Finite eighth moments are necessary for the bootstrap distribution to converge to the exponential distribution. \cite{bootstrap}[Corollary 1] Having vanishing third moments satisfies a technical constraint guaranteeing a good approximation of the relevant covariance matrix. \cite{bootstrap}[Remark 5] Without this, we cannot attain the claimed convergence rate. \\ The $\{a_t\}$ vanish exponentially; this is a requirement imposed by the use of Edgeworth expansions in the proof.
+\begin{itemize}[listparindent = 1em]
+\item First, $\{X_t:t\in\mathbb Z\}$ must be a real-valued linear process: $X_t = \sum_{u\in\mathbb Z} a_u \xi_{t-u}$.
+
+The $\{\xi_t\}$ satisfy $\mathbb E \xi_1 = 0$, $\mathbb E \xi_1^2 = 1$, $\mathbb E \xi_1^8 <\infty$, $\mathbb E \xi_t^3 = 0$. The first two conditions are necessary for weak stationarity. Finite eighth moments are necessary for the bootstrap distribution to converge to the exponential distribution. \cite{bootstrap}[Corollary 1] Having vanishing third moments satisfies a technical constraint guaranteeing a good approximation of the relevant covariance matrix. \cite{bootstrap}[Remark 5] Without this, we cannot attain the claimed convergence rate. 
+
+The $\{a_t\}$ vanish exponentially; this is a requirement imposed by the use of Edgeworth expansions in the proof.
 \item The estimate $\hat f$ of $f$ is uniformly strongly consistent, such that
 $$
 \sup_{\alpha\in[0,\pi]} |\hat f(\alpha) - f(\alpha)| \to 0 ~~\text{almost surely.}
@@ -40,6 +49,6 @@ To be precise, let $A(\phi,g)$ be the ratio statistic corresponding to the time 
 \textbf{Theorem:}
 Suppose the necessary assumptions hold. Then for almost all samples $\{I_j\}$, 
 $$
-\sup_C \left| P\bigl( \sqrt T D_T(A(\phi,J_T) - A(\phi,g)) \in C \bigr) \right. - \left. P^*\bigl(\sqrt T \hat D_T(B(\phi,J_T^*)-B(\phi,\hat g)) \in C  \bigr)\right| = o(T^{-1/2})~~.
+\sup_C \left| \Pr\bigl( \sqrt T D_T(A(\phi,J_T) - A(\phi,g)) \in C \bigr) \right. - \left. \Pr^*\bigl(\sqrt T \hat D_T(B(\phi,J_T^*)-B(\phi,\hat g)) \in C  \bigr)\right| = o(T^{-1/2})~~.
 $$
 The $\sup$ is taken over convex measurable subsets of $\mathbb R^d$.

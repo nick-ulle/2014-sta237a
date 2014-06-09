@@ -1,5 +1,5 @@
 
-\subsection*{Bootstrapping Time Series}
+\subsection*{Bootstrapping a Time Series}
 Since its introduction over three decades ago, the bootstrap has become a popular and widely applicable tool of statistical inference. At times, bootstrapping can provide valuable insight into the distributions of statistics, which would be unattainable by any analytical procedures. Over the years, numerous modifications and extensions of the original algorithm have made it possible to implement bootstrapping procedures in a variety of settings.
 
 In the time series framework, observations are generally not independent and the dependence structure is a key object of interest. Moreover, there is usually an absence of repeated measurements, as only one realization of the process is observed. Since the bootstrap is based on the resampling of i.i.d objects, these two complications make the extension of the bootstrap to time series analysis a challenge.
@@ -35,7 +35,7 @@ Since the estimate can be expressed as a ratio of two spectral mean estimates, i
 
 The sample means and ratio statistics are both notable classes of statistics. Since it is only required that $\phi(\alpha)$ is bounded in variation, a great number of functions may be chosen for $\phi$, resulting in many different statistics and estimates. Below are several important estimates that can be expressed as either $A(\phi, I_T)$ or $A(\phi, J_T)$ with proper choice of $\phi$:\\
 
-\begin{table}
+\begin{table}[h!]
 \centering
 \begin{tabular}{ccc}
 \toprule
@@ -46,6 +46,7 @@ $\on{[0,\lambda]}(\alpha)$ & Spectral Distribution Function $\hat{F}_T(\lambda)$
 \bottomrule
 \end{tabular}
 \caption{Useful spectral means and ratio statistics.}
+\label{ratio}
 \end{table}
 
 
