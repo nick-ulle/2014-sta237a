@@ -1,0 +1,45 @@
+\subsection*{Resampling the Periodogram}
+We are interested in approximating the distribution of ratio statistic estimates, and so need an estimator for the spectral mean $A(\phi,J_T)$ which we can compute via resampling. To this end, choose $n = \lfloor T/2\rfloor$, and consider $n$ equi-spaced samples of the periodogram, $I_j := I_T(\frac{j}{T/2}\pi)$ for $j=1,\ldots,n$. By resampling from (a carefully normalized version of) these values, we can obtain an appropriate discretization of the spectral mean. Letting $\{I_j^*\}$ be the $n$ resampled values, and $\phi_j := \phi(\frac{j}{T/2}\pi)$, consider
+$$
+B(\phi,I_T^*) := \frac{\pi}{n} \sum_{j=1}^n \phi_j I_j^*~~.
+$$
+Our interest is in the behavior of the approximation error $A(\phi,I_T) - A(\phi,f)$, and so we consider the corresponding quantity $B(\phi,I_T^*) - B(\phi,\hat f)$, where $\hat f$ is a suitable estimate for the spectral density (e.g., a consistent estimator formed from the periodogram values, perhaps via kernel smoothing). For the former, the (untapered) periodogram estimate obeys a central limit theorem (proved, e.g., in \cite{dahlhauslimitlaw}), such that $\sqrt T \bigl( A(\phi,I_T) - A(\phi,f)\bigr)$ is asymptotically normal with variance equal to $2\pi \int \phi^2 f^2 + (\kappa_4 / \sigma^4)\left(\int \phi f\right)^2~$. Here $\kappa_4$ and $\sigma^2$ refer to the fourth cumulant and variance of the innovations in the underlying presumed linear process. Additionally, in \cite{bootstrap}, it is stated that $\sqrt T \bigl( B(\phi,I_T^*) - B(\phi,\hat f)\bigr)$ is also asymptotically normal, with variance proportional to $2\pi \int \phi^2 f^2~$.
+
+Hence, the latter statistic will only be useful for a bootstrap procedure if the second term in the former variance vanishes. Conveniently, this is fulfilled for example by Whittle estimates, and more generally by all ratio statistics. So, we will give an algorithm for resampling the periodogram which explains the `careful normalization' mentioned above. In particular, the quantities which we resample are Studentized, because we expect them to asymptotically vary as independent exponential variables. \cite{brillinger}[Theorem 5.2.6] \\
+
+\textbf{Periodogram Bootstrap Algorithm} (of \cite{bootstrap})
+\begin{enumerate}
+\item Obtain the periodogram sample values $\{I_j\}$ for $j=1,\ldots,n$, possibly applying a taper to the data.
+\item Obtain a consistent estimate $\hat f$ of the spectral density $f$, using the $\{I_j\}$. Kernel estimates are typical. 
+\item Obtain Studentized periodogram samples $\hat\epsilon_j := I_j / \hat f_j$. 
+\item Rescale the $\hat\epsilon_j$'s by their mean, so that $\tilde\epsilon_j := \hat\epsilon_j / \{(1/n) \sum_j \hat\epsilon_j\}$. This avoids unnecessary bias at the resampling stage. 
+\item Sample the empirical distribution of $\{\tilde\epsilon_j\}$ to obtain a bootstrap sample $\{\epsilon^*_j\}$. 
+\item Define bootstrap periodogram values via $I_j^* := \hat f_j \epsilon^*_j$.
+\end{enumerate}
+
+\subsection*{Assumptions}
+
+In order to estimate the distribution of the approximation error $A(\phi,I_T) - A(\phi,f)$ by that of $B(\phi,I_T^*) - B(\phi,\hat f)$, the time series and desired spectral mean must be sufficiently nice; we describe some conditions and their relationship with the result. 
+\begin{itemize}
+\item First, $\{X_t:t\in\mathbb Z\}$ must be a real-valued linear process: $X_t = \sum_{u\in\mathbb Z} a_u \xi_{t-u}$. \\ The $\{\xi_t\}$ satisfy $\mathbb E \xi_1 = 0$, $\mathbb E \xi_1^2 = 1$, $\mathbb E \xi_1^8 <\infty$, $\mathbb E \xi_t^3 = 0$. The first two conditions are necessary for weak stationarity. Finite eighth moments are necessary for the bootstrap distribution to converge to the exponential distribution. \cite{bootstrap}[Corollary 1] Having vanishing third moments satisfies a technical constraint guaranteeing a good approximation of the relevant covariance matrix. \cite{bootstrap}[Remark 5] Without this, we cannot attain the claimed convergence rate. \\ The $\{a_t\}$ vanish exponentially; this is a requirement imposed by the use of Edgeworth expansions in the proof.
+\item The estimate $\hat f$ of $f$ is uniformly strongly consistent, such that
+$$
+\sup_{\alpha\in[0,\pi]} |\hat f(\alpha) - f(\alpha)| \to 0 ~~\text{almost surely.}
+$$
+This is necessary for showing convergence in distribution. Further, the spectral density $f$ itself is everywhere-positive and bounded away from zero; in particular, there are no vanishing Fourier modes. 
+\item $\phi$ is a $d$-dimensional vector of bounded-variation functions $\phi^{(r)}:[0,\pi]\to\mathbb R$, each with even periodic extension to all of $\mathbb R$. This broad definition allows for a rich choice of spectral means for estimating. The use of Edgeworth expansions further imposes that the Fourier coefficients $\{\hat \phi (\omega)\}$ vanish exponentially. While this would technically omit some important classes of statistics, this requirement is not sharp, and the method's validity beyond the theoretical guarantee is suggested by empirical evidence. 
+\item The taper function has several technical limitations placed on it; the Tukey-Hanning tapers are given in \cite{bootstrap} as an example of an acceptable choice. The innovations $\{\xi_t\}$ and $\phi$ also must satisfy some technical conditions for the use of Edgeworth expansions. 
+\end{itemize}
+
+\subsection*{Convergence Rate}
+
+Under the necessary assumptions, estimating the distribution of the standardized spectral density by resampling from the standardized periodogram is consistent, and the convergence rate is asymptotically better than that achieved by the normal approximation. 
+
+To be precise, let $A(\phi,g)$ be the ratio statistic corresponding to the time series with spectral density $f$, $J_T$ be the corresponding standardized periodogram, $J_T^*$ be the bootstrapped periodogram, and $\hat g$ be an estimator of the normalized spectral density, defined according to $\hat g_j := \hat f_j / \{(\pi/n) \sum_k \hat f_k\}$. Denote $V_T$ as the covariance matrix of $\sqrt T A(\phi,J_T)$. Define $D_T$ according to $D_T^2 = V_T^{-1}$, and define $\hat D_T$ analogously via $\sqrt T B(\phi,J_T^*)$. Let $P^*$ denote the conditional probability given the data. Then, we have the result \cite{bootstrap}[Theorem 1]:\\
+
+\textbf{Theorem:}
+Suppose the necessary assumptions hold. Then for almost all samples $\{I_j\}$, 
+$$
+\sup_C \left| P\bigl( \sqrt T D_T(A(\phi,J_T) - A(\phi,g)) \in C \bigr) \right. - \left. P^*\bigl(\sqrt T \hat D_T(B(\phi,J_T^*)-B(\phi,\hat g)) \in C  \bigr)\right| = o(T^{-1/2})~~.
+$$
+The $\sup$ is taken over convex measurable subsets of $\mathbb R^d$.
